@@ -7,6 +7,7 @@ import android.graphics.pdf.PdfRenderer;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.os.Looper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,9 +30,10 @@ import android.os.Handler;
 public class FlutterPluginPdfViewerPlugin implements MethodCallHandler {
     private static Registrar instance;
     private HandlerThread handlerThread;
-    private Handler backgroundHandler;
     private final Object pluginLocker = new Object();
     private final String filePrefix = "FlutterPluginPdfViewer";
+    private Handler backgroundHandler = new Handler(Looper.getMainLooper());
+
 
     /**
      * Plugin registration.
@@ -51,34 +53,36 @@ public class FlutterPluginPdfViewerPlugin implements MethodCallHandler {
                 backgroundHandler = new Handler(handlerThread.getLooper());
             }
         }
-        final Handler mainThreadHandler = new Handler();
+        final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
         backgroundHandler.post(//
                 new Runnable() {
                     @Override
                     public void run() {
                         switch (call.method) {
-                        case "getNumberOfPages":
-                            final String numResult = getNumberOfPages((String) call.argument("filePath"));
-                            mainThreadHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    result.success(numResult);
-                                }
-                            });
-                            break;
-                        case "getPage":
-                            final String pageResult = getPage((String) call.argument("filePath"),
-                                    (int) call.argument("pageNumber"));
-                            mainThreadHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    result.success(pageResult);
-                                }
-                            });
-                            break;
-                        default:
-                            result.notImplemented();
-                            break;
+                            case "getNumberOfPages":
+
+
+                                final String numResult = getNumberOfPages((String) call.argument("filePath"));
+                                mainThreadHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        result.success(numResult);
+                                    }
+                                });
+                                break;
+                            case "getPage":
+                                final String pageResult = getPage((String) call.argument("filePath"),
+                                        (int) call.argument("pageNumber"));
+                                mainThreadHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        result.success(pageResult);
+                                    }
+                                });
+                                break;
+                            default:
+                                result.notImplemented();
+                                break;
                         }
                     }
                 });

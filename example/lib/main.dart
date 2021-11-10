@@ -10,7 +10,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isLoading = true;
-  PDFDocument document;
+  late PDFDocument document;
 
   @override
   void initState() {
